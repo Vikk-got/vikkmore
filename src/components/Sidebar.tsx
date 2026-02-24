@@ -1,8 +1,13 @@
-import { Home, Search, Heart, Plus, Settings, Import, Music } from "lucide-react";
+import { Home, Search, Heart, Plus, Settings, Import, Music, Download } from "lucide-react";
 import { getPlaylists, type Playlist } from "@/lib/storage";
 import { useState, useEffect } from "react";
 import ImportPlaylistModal from "@/components/ImportPlaylistModal";
 import CreatePlaylistModal from "@/components/CreatePlaylistModal";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 interface SidebarProps {
   activeView: string;
@@ -15,9 +20,42 @@ const Sidebar = ({ activeView, onNavigate, isOpen, onClose }: SidebarProps) => {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [showImport, setShowImport] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   const refresh = () => setPlaylists(getPlaylists());
   useEffect(refresh, [activeView]);
+
+  useEffect(() => {
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', () => setIsInstalled(true));
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', () => setIsInstalled(true));
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  };
 
   return (
     <>
@@ -52,6 +90,20 @@ const Sidebar = ({ activeView, onNavigate, isOpen, onClose }: SidebarProps) => {
               active={activeView === "settings"} 
               onClick={() => onNavigate("settings")} 
             />
+            
+            {/* Install App Button - Only show if not installed and prompt is available */}
+            {!isInstalled && deferredPrompt && (
+              <button
+                onClick={handleInstallClick}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all bg-gradient-to-r from-primary/30 to-primary/20 text-primary hover:from-primary/40 hover:to-primary/30 border border-primary/40 hover:border-primary/60 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+              >
+                <Download className="w-5 h-5 shrink-0" />
+                <div className="text-left">
+                  <div className="font-semibold">Install App</div>
+                  <div className="text-xs text-primary/80">Add to Home Screen</div>
+                </div>
+              </button>
+            )}
           </nav>
 
           {/* Library Section */}

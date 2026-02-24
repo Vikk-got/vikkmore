@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Music2, X } from "lucide-react";
+import { InstallPWA } from "./components/InstallPWA";
 import YouTube from "react-youtube"; // Ensure this is installed
 
 // Context & Providers
@@ -114,6 +115,7 @@ const AppLayout = () => {
       </div>
 
       <PlayerBar />
+      <InstallPWA />
     </div>
   );
 };
