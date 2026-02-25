@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Music2, X } from "lucide-react";
 import { InstallPWA } from "./components/InstallPWA";
-import YouTube from "react-youtube"; // Ensure this is installed
 
 // Context & Providers
 import { PlayerProvider, usePlayer } from "@/context/PlayerContext";
@@ -19,38 +18,11 @@ import SettingsView from "./views/SettingsView";
 import PlaylistView from "./views/PlaylistView";
 import LikedView from "./views/LikedView";
 import PlayerBar from "./components/PlayerBar"; 
+import YouTubePlayer from "./components/YouTubePlayer";
+import MediaSession from "./components/MediaSession";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
-
-// This hidden component handles the actual YouTube stream
-const HiddenPlayer = () => {
-  const { currentSong, isPlaying, playerRef, nextSong, volume } = usePlayer();
-
-  return (
-    <div className="hidden pointer-events-none">
-      {currentSong && (
-        <YouTube
-          videoId={currentSong.id}
-          opts={{
-            playerVars: {
-              autoplay: 1,
-              controls: 0,
-            },
-          }}
-          onReady={(event) => {
-            playerRef.current = event.target;
-            event.target.setVolume(volume);
-          }}
-          onEnd={nextSong}
-          onStateChange={(event) => {
-            // Synchronize play/pause state if video is manually paused
-          }}
-        />
-      )}
-    </div>
-  );
-};
 
 const AppLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -70,10 +42,13 @@ const AppLayout = () => {
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden flex-col">
-      {/* 1. THE HIDDEN YOUTUBE ENGINE */}
-      <HiddenPlayer />
+      {/* 1. THE YOUTUBE PLAYER ENGINE */}
+      <YouTubePlayer />
+      
+      {/* 2. MEDIA SESSION HANDLER (Always mounted) */}
+      <MediaSession />
 
-      {/* 2. TOP NAVBAR (Logo Trigger) */}
+      {/* 3. TOP NAVBAR (Logo Trigger) */}
       <header className="h-16 flex items-center justify-between px-6 bg-black border-b border-white/10 z-[60] shrink-0">
         <div className="w-10" /> 
         <button 

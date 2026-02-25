@@ -5,12 +5,11 @@ declare global {
   interface Window { 
     onYouTubeIframeAPIReady?: () => void; 
     YT?: any;
-    mediaSession?: MediaSession;
   }
 }
 
 const YouTubePlayer = () => {
-  const { currentSong, volume, playerRef, nextSong, isPlaying, setVolume: setPlayerVolume } = usePlayer();
+  const { currentSong, volume, playerRef, nextSong, isPlaying } = usePlayer();
   const containerRef = useRef<HTMLDivElement>(null);
   const apiLoaded = useRef(false);
   const playerReady = useRef(false);
@@ -37,42 +36,6 @@ const YouTubePlayer = () => {
     }
   }, []);
 
-  // Update media session metadata
-  const updateMediaSession = useCallback(() => {
-    if ('mediaSession' in navigator && currentSong) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: currentSong.title,
-        artist: currentSong.artist,
-        album: 'Vikkmore Music Player',
-        artwork: [
-          { src: currentSong.thumbnail, sizes: '96x96', type: 'image/jpeg' },
-          { src: currentSong.thumbnail, sizes: '128x128', type: 'image/jpeg' },
-          { src: currentSong.thumbnail, sizes: '192x192', type: 'image/jpeg' },
-          { src: currentSong.thumbnail, sizes: '256x256', type: 'image/jpeg' },
-          { src: currentSong.thumbnail, sizes: '384x384', type: 'image/jpeg' },
-          { src: currentSong.thumbnail, sizes: '512x512', type: 'image/jpeg' },
-        ]
-      });
-
-      // Set media session action handlers
-      navigator.mediaSession.setActionHandler('play', () => {
-        playerRef.current?.playVideo?.();
-      });
-      
-      navigator.mediaSession.setActionHandler('pause', () => {
-        playerRef.current?.pauseVideo?.();
-      });
-      
-      navigator.mediaSession.setActionHandler('nexttrack', () => {
-        nextSong();
-      });
-      
-      navigator.mediaSession.setActionHandler('previoustrack', () => {
-        // Implement previous song if needed
-      });
-    }
-  }, [currentSong, nextSong, playerRef]);
-
   const initPlayer = useCallback(() => {
     if (!containerRef.current || playerRef.current) return;
     playerRef.current = new window.YT.Player(containerRef.current, {
@@ -84,19 +47,17 @@ const YouTubePlayer = () => {
         disablekb: 1, 
         fs: 0, 
         modestbranding: 1,
-        playsinline: 1, // Allow inline playback
+        playsinline: 1,
       },
       events: {
         onReady: () => {
           playerReady.current = true;
           playerRef.current?.setVolume(volume);
           if (currentSong) playerRef.current?.loadVideoById(currentSong.id);
-          updateMediaSession();
         },
         onStateChange: (e: any) => {
           if (e.data === window.YT.PlayerState.PLAYING) {
             requestWakeLock();
-            setPlayerVolume(volume); // Sync volume
           } else if (e.data === window.YT.PlayerState.PAUSED || e.data === window.YT.PlayerState.ENDED) {
             releaseWakeLock();
           }
@@ -107,7 +68,7 @@ const YouTubePlayer = () => {
         },
       },
     });
-  }, [volume, currentSong, updateMediaSession, requestWakeLock, releaseWakeLock, nextSong, setPlayerVolume]);
+  }, [volume, currentSong, requestWakeLock, releaseWakeLock, nextSong]);
 
   useEffect(() => {
     if (window.YT && window.YT.Player) {
@@ -127,8 +88,7 @@ const YouTubePlayer = () => {
   useEffect(() => {
     if (!currentSong || !playerRef.current || !playerReady.current) return;
     playerRef.current.loadVideoById(currentSong.id);
-    updateMediaSession();
-  }, [currentSong?.id, updateMediaSession]);
+  }, [currentSong?.id]);
 
   useEffect(() => {
     playerRef.current?.setVolume?.(volume);
@@ -138,7 +98,6 @@ const YouTubePlayer = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && isPlaying && playerRef.current) {
-        // App is in background but music should continue playing
         console.log('App moved to background, music continues');
       }
     };

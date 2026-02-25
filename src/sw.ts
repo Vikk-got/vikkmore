@@ -47,6 +47,21 @@ registerRoute(
   'GET'
 )
 
+// Cache audio files (for better performance)
+registerRoute(
+  ({ request }) => request.destination === 'audio',
+  new CacheFirst({
+    cacheName: 'audio-cache',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 30,
+        maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+      })
+    ]
+  }),
+  'GET'
+)
+
 // Handle background audio playback
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
