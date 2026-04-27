@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
     const doc = await collection.findOne(
       { userId },
-      { projection: { _id: 0, likedSongs: 1, playlists: 1, recentSongs: 1 } }
+      { projection: { _id: 0, likedSongs: 1, playlists: 1, recentSongs: 1, apiKey: 1 } }
     );
 
     return NextResponse.json({
