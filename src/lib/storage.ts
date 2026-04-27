@@ -17,6 +17,7 @@ interface UserLibraryData {
   likedSongs: Song[];
   playlists: Playlist[];
   recentSongs: Song[];
+  apiKey: string;
 }
 
 const STORAGE_SYNC_EVENT = "vikkmore-library-sync";
@@ -30,6 +31,7 @@ const EMPTY_LIBRARY: UserLibraryData = {
   likedSongs: [],
   playlists: [],
   recentSongs: [],
+  apiKey: "",
 };
 
 let cache: UserLibraryData = { ...EMPTY_LIBRARY };
@@ -89,6 +91,7 @@ const normalizeLibrary = (data?: Partial<UserLibraryData>): UserLibraryData => (
   likedSongs: dedupeSongs(data?.likedSongs || []),
   playlists: mergePlaylists(data?.playlists || []),
   recentSongs: dedupeSongs(data?.recentSongs || []).slice(0, 30),
+  apiKey: data?.apiKey || "",
 });
 
 const readLegacyLibrary = (): UserLibraryData =>
@@ -298,14 +301,17 @@ export const addToRecent = async (song: Song) => {
   }));
 };
 
-export const getApiKey = (): string => {
-  if (typeof window !== 'undefined') {
+export const getApiKey = async (): Promise<string> => {
+  const library = await loadUserLibrary();
+  // fallback to localStorage for legacy
+  if (!library.apiKey && typeof window !== 'undefined') {
     return localStorage.getItem(API_KEY_KEY) || "";
   }
-  return "";
+  return library.apiKey;
 };
-export const setApiKey = (key: string) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(API_KEY_KEY, key);
-  }
+
+export const setApiKey = async (key: string): Promise<void> => {
+  await updateLibrary((current) => ({ ...current, apiKey: key }));
+  // clear legacy localStorage key
+  if (typeof window !== 'undefined') localStorage.removeItem(API_KEY_KEY);
 };

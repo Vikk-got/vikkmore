@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Key, ExternalLink } from "lucide-react";
 import { getApiKey, setApiKey } from "@/lib/storage";
 
 const SettingsView = () => {
-  const [key, setKey] = useState(getApiKey());
+  const [key, setKey] = useState("");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = () => {
-    setApiKey(key);
+  useEffect(() => {
+    getApiKey().then((k) => {
+      setKey(k);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    await setApiKey(key);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -36,12 +44,14 @@ const SettingsView = () => {
           type="password"
           value={key}
           onChange={(e) => setKey(e.target.value)}
-          placeholder="AIza..."
-          className="w-full px-4 py-2.5 bg-secondary text-secondary-foreground rounded-md text-sm outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+          placeholder={loading ? "Loading..." : "AIza..."}
+          disabled={loading}
+          className="w-full px-4 py-2.5 bg-secondary text-secondary-foreground rounded-md text-sm outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground disabled:opacity-50"
         />
         <button
           onClick={handleSave}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-transform"
+          disabled={loading}
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-transform disabled:opacity-50"
         >
           {saved ? "✓ Saved!" : "Save"}
         </button>

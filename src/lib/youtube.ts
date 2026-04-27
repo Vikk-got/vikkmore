@@ -62,7 +62,7 @@ async function fetchDurationSeconds(ids: string[], apiKey: string): Promise<Reco
 }
 
 async function searchYouTubeSongs(query: string, channelId?: string): Promise<Song[]> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new Error("API key not set");
 
   const channelParam = channelId ? `&channelId=${channelId}` : "";
@@ -92,7 +92,7 @@ export async function searchYouTube(query: string): Promise<Song[]> {
 }
 
 export async function searchYouTubePlaylists(query: string): Promise<PlaylistResult[]> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new Error("API key not set");
 
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&type=playlist&q=${encodeURIComponent(query)}&key=${apiKey}`;
@@ -109,7 +109,7 @@ export async function searchYouTubePlaylists(query: string): Promise<PlaylistRes
 }
 
 export async function searchYouTubeAlbums(query: string): Promise<AlbumResult[]> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new Error("API key not set");
 
   const albumQuery = `${query} album`;
@@ -127,7 +127,7 @@ export async function searchYouTubeAlbums(query: string): Promise<AlbumResult[]>
 }
 
 export async function searchYouTubeChannels(query: string): Promise<ArtistResult[]> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new Error("API key not set");
 
   const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&type=channel&q=${encodeURIComponent(query)}&key=${apiKey}`;
@@ -164,7 +164,7 @@ export async function searchYouTubeChannelPlaylists(channelId: string): Promise<
 }
 
 export async function getTrendingMusic(): Promise<Song[]> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) return [];
 
   const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&chart=mostPopular&videoCategoryId=10&maxResults=20&regionCode=US&key=${apiKey}`;
@@ -243,13 +243,13 @@ async function fetchPlaylistSongsById(apiKey: string, playlistId: string): Promi
 }
 
 export async function getYouTubePlaylistSongs(playlistId: string): Promise<{ name: string; songs: Song[] }> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new Error("API key not set");
   return fetchPlaylistSongsById(apiKey, playlistId);
 }
 
 export async function importYouTubePlaylist(input: string): Promise<{ name: string; songs: Song[] }> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) throw new Error("API key not set");
 
   const playlistId = extractPlaylistId(input);
