@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { Trash2 } from "lucide-react";
+import { Trash2, AlertCircle, ArrowRight } from "lucide-react";
 import { getTrendingMusic } from "@/lib/youtube";
 import { 
   getRecentSongs, 
@@ -142,26 +142,7 @@ const HomeView = ({ onNavigate }: HomeViewProps) => {
         </section>
       )}
 
-      {!hasKey && (
-        <section>
-          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 md:p-6 mb-8">
-            <h2 className="text-lg md:text-xl font-bold text-primary mb-2">
-              {isSignedIn ? "API Key Required" : "Guest Mode"}
-            </h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              {isSignedIn 
-                ? "Add a YouTube API key in settings to unlock full search, trending features, and personalized playlists." 
-                : "You're currently in guest mode. Sign up and add a YouTube API key in settings to unlock full search and trending features."}
-            </p>
-            <button
-              onClick={() => onNavigate("settings")}
-              className="text-xs font-semibold bg-primary text-primary-foreground px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
-            >
-              {isSignedIn ? "Add API Key" : "Go to Settings"}
-            </button>
-          </div>
-        </section>
-      )}
+
 
       {!hasKey && (
         <section>

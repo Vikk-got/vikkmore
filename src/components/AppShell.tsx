@@ -94,7 +94,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           onNavigate={handleNavigate} 
         />
 
-        <main className="flex-1 overflow-y-auto bg-background relative pb-24 md:pb-0 scrollbar-thin">
+        <main 
+          key={pathname}
+          className="flex-1 overflow-y-auto bg-background relative pb-24 md:pb-0 scrollbar-thin animate-page-enter"
+        >
           {children}
           
           {isSidebarOpen && (

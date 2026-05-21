@@ -8,15 +8,11 @@ const AboutView = () => {
     },
     {
       q: "Is it free to use?",
-      a: "Absolutely. vikkmore is free and open for everyone. You just need your own YouTube API key to power the search and trending features."
+      a: "Absolutely. vikkmore is free and open for everyone. You can stream music instantly for free without ads or paywalls."
     },
     {
-      q: "Why do I need an API key?",
-      a: "To ensure the best performance and stay within YouTube's usage limits, we use your personal API key for searches. This keeps the service free and fast for everyone."
-    },
-    {
-      q: "How do I create an API key?",
-      a: "Go to the Google Cloud Console, create a new project, enable the 'YouTube Data API v3', and create an API Key under the 'Credentials' tab."
+      q: "How is search powered?",
+      a: "vikkmore uses the YouTube Data API powered securely via server-side environment credentials. Searches and stream queries are handled automatically without any user configuration needed."
     },
     {
       q: "Where is my data stored?",

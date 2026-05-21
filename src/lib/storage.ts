@@ -332,16 +332,52 @@ export const removeFromRecent = async (songId: string) => {
   }));
 };
 
+let cachedApiKey: string | null = null;
+
 export const getApiKey = async (): Promise<string> => {
-  const library = await loadUserLibrary();
-  // fallback to localStorage for legacy
-  if (!library.apiKey && typeof window !== 'undefined') {
-    return localStorage.getItem(API_KEY_KEY) || "";
+  if (cachedApiKey) return cachedApiKey;
+
+  // 1. Try to fetch from server env if in browser
+  if (typeof window !== 'undefined') {
+    try {
+      const res = await fetch("/api/youtube-key");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.apiKey) {
+          cachedApiKey = data.apiKey;
+          return data.apiKey;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch API key from server", e);
+    }
+  } else {
+    // on server side
+    const key = process.env.YOUTUBE_API_KEY || process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || "";
+    if (key) return key;
   }
-  return library.apiKey;
+
+  // 2. Fallback to MongoDB / User Library stored key
+  const library = await loadUserLibrary();
+  if (library.apiKey) {
+    cachedApiKey = library.apiKey;
+    return library.apiKey;
+  }
+
+  // 3. Fallback to localStorage
+  if (typeof window !== 'undefined') {
+    const key = localStorage.getItem(API_KEY_KEY) || "";
+    if (key) {
+      cachedApiKey = key;
+      return key;
+    }
+  }
+
+  return "";
 };
 
 export const setApiKey = async (key: string): Promise<void> => {
+  cachedApiKey = key;
   await updateLibrary((current) => ({ ...current, apiKey: key }));
   // clear legacy localStorage key
   if (typeof window !== 'undefined') localStorage.removeItem(API_KEY_KEY);

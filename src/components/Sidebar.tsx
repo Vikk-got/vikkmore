@@ -6,6 +6,7 @@ import { getPlaylists, subscribeToLibraryChanges, type Playlist } from "@/lib/st
 import { useState, useEffect } from "react";
 import ImportPlaylistModal from "@/components/ImportPlaylistModal";
 import CreatePlaylistModal from "@/components/CreatePlaylistModal";
+import { useRouter } from "next/navigation";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -20,6 +21,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeView, onNavigate, isOpen, onClose }: SidebarProps) => {
+  const router = useRouter();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [showImport, setShowImport] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -63,6 +65,22 @@ const Sidebar = ({ activeView, onNavigate, isOpen, onClose }: SidebarProps) => {
       window.removeEventListener('appinstalled', () => setIsInstalled(true));
     };
   }, []);
+
+  useEffect(() => {
+    // Prefetch all major client pages for instant page switching
+    router.prefetch("/home");
+    router.prefetch("/search");
+    router.prefetch("/liked");
+    router.prefetch("/profile");
+    router.prefetch("/settings");
+    router.prefetch("/about");
+  }, [router]);
+
+  useEffect(() => {
+    playlists.forEach((pl) => {
+      router.prefetch(`/playlist/${pl.id}`);
+    });
+  }, [playlists, router]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -160,7 +178,7 @@ const Sidebar = ({ activeView, onNavigate, isOpen, onClose }: SidebarProps) => {
               <div className="space-y-1">
                 <SidebarItem 
                   icon={Settings} 
-                  label="API Settings" 
+                  label="Settings" 
                   active={activeView === "/settings"} 
                   onClick={() => onNavigate("settings")} 
                 />

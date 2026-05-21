@@ -1,6 +1,6 @@
 import { Play } from "lucide-react";
 import type { PlaylistResult } from "@/lib/youtube";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 interface PlaylistCardProps {
@@ -10,11 +10,12 @@ interface PlaylistCardProps {
 
 const PlaylistCard = ({ playlist, onClick }: PlaylistCardProps) => {
   const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
   const router = useRouter();
 
   const handleClick = () => {
     if (!isSignedIn) {
-      router.push("/sign-in");
+      openSignIn();
       return;
     }
     onClick(playlist.id);
