@@ -18,4 +18,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://vikkmore.com/sitemap.xml
+Sitemap: https://vikkmore.vercel.app/sitemap.xml

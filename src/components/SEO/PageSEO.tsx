@@ -13,7 +13,7 @@ const PageSEO = ({
   title,
   description,
   keywords = "vikkmore, youtube music player, free music streaming, playlist manager",
-  image = "https://vikkmore.com/icon-512.png"
+  image = "https://vikkmore.vercel.app/icon-512.png"
 }: PageSEOProps) => {
   const pathname = usePathname();
 
